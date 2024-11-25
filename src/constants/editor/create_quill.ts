@@ -29,7 +29,8 @@ export const create_quill = ({
     `;
   }
 
-  let modules = `toolbar: ${toolbar},`;
+  // let modules = `toolbar: ${toolbar},`;
+  let modules = `imageEditor: true, videoEditor: true, linkEditor: true, toolbar: ${toolbar},`;
 
   if (clipboard) {
     modules += `clipboard: ${clipboard},`;
@@ -40,10 +41,11 @@ export const create_quill = ({
 
   return `
   <script>
-  
+
   ${font}
   ${customJS}
   var quill = new Quill('#${id}', {
+    readOnly: true,
     modules: { ${modules} },
     placeholder: '${placeholder}',
     theme: '${theme}'

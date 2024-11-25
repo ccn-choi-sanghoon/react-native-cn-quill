@@ -153,7 +153,7 @@ export const editor_js = `
     var getSelectionJson = JSON.stringify({
       type: 'get-selection',
       key: key,
-      data: getSelectionData 
+      data: getSelectionData
     });
     sendMessage(getSelectionJson);
   }
@@ -205,6 +205,196 @@ export const editor_js = `
     sendMessage(formatTextJson);
   }
 
+  // [STEP_3]
+  // 특정 id를 가진 element의 attribute를 모두 가져온다.
+  const CL_getElementAttributeByID = function (key, id) {
+    // alert('CL_getElementAttributeByID called');
+    const element = document.getElementById(id);
+    let result = {};
+
+    if(element == null) {
+      result = null;
+    } else {
+      const attributes = element.attributes;
+
+      for (let i = 0; i < attributes.length; i++) {
+          const attr = attributes[i];
+          result[attr.name] = attr.value;
+      }
+
+    }
+
+    const msgJson = JSON.stringify({
+      type: 'CL_getElementAttributeByID',
+      key: key,
+      data: {
+        id,
+        result,
+      }
+    });
+    sendMessage(msgJson);
+  }
+
+  // 특정 id element에 classList의 add 메소드를 호출한다.
+  // mdn https://developer.mozilla.org/ko/docs/Web/API/Element/classList#add_string_string_..._
+  const CL_addElementClassListByID = function (key, args) {
+    const element = document.getElementById(args.id);
+    let result = {};
+
+
+    if(element == null) {
+      result = null;
+    } else {
+      element.classList.add(args.clz);
+      const isContain = element.classList.contains(args.clz);
+
+      result = {
+        isSuccess: isContain,
+      };
+    }
+
+
+    const msgJson = JSON.stringify({
+      type: 'CL_addElementClassListByID',
+      key: key,
+      data: {
+        id: args.id,
+        result,
+      }
+    });
+    sendMessage(msgJson);
+  }
+
+  // 특정 id element에 classList의 remove 메소드를 호출한다.
+  // mdn https://developer.mozilla.org/ko/docs/Web/API/Element/classList#remove_string_string_..._
+  const CL_removeElementClassListByID = function (key, args) {
+    const element = document.getElementById(args.id);
+    let result = null;
+
+    if(element == null) {
+      result = null; // id element가 없을 경우
+    } else {
+      element.classList.remove(args.clz);
+      const isContain = element.classList.contains(args.clz);
+
+      result = {
+        isSuccess: !isContain,
+      };
+    }
+
+    const msgJson = JSON.stringify({
+      type: 'CL_removeElementClassListByID',
+      key: key,
+      data: {
+        id: args.id,
+        result,
+      }
+    });
+    sendMessage(msgJson);
+  }
+
+  // 특정 id element에 classList의 contains 메소드를 호출한다.
+  // mdn https://developer.mozilla.org/ko/docs/Web/API/Element/classList#contains_string_
+  const CL_containsElementClassListByID = function (key, args) {
+    const element = document.getElementById(args.id);
+    let result = {};
+
+    if(element == null) {
+      result = null;
+    } else {
+      const isContain = element.classList.contains(args.clz);
+
+      result = {
+        isContain,
+      };
+    }
+
+    const msgJson = JSON.stringify({
+      type: 'CL_containsElementClassListByID',
+      key: key,
+      data: {
+        id: args.id,
+        result,
+      }
+    });
+    sendMessage(msgJson);
+  }
+
+  //
+  //
+  const overlayEleID = 'overlay-border';
+  const CL_SetOverlayBorderByID = function (key, args) {
+    const element = document.getElementById(args.id);
+    let result = {};
+
+    if(element == null) {
+      result = null;
+    } else {
+      if(args.isVisible) {
+        // 기존에 있으면 삭제
+        const orgEle = document.getElementById(overlayEleID);
+        if(orgEle != null) {
+          // orgEle.remove();
+          result = null;
+        } else {
+          // 오버레이 외곽선 요소 생성
+          const overlayBorder = document.createElement('div');
+          overlayBorder.classList.add('overlay-border');
+          overlayBorder.setAttribute(overlayEleID, 'overlay-border'); // id 설정
+
+          // 대상 요소에 오버레이 추가
+          targetElement.appendChild(overlayBorder);
+          result = {
+            isSuccess: true,
+          };
+        }
+      } else {
+        // 기존에 있으면 삭제
+        const orgEle = document.getElementById(overlayEleID);
+        if(orgEle != null) {
+          orgEle.remove();
+        }
+
+        result = {
+          isSuccess: true,
+        };
+      }
+
+    }
+
+    const msgJson = JSON.stringify({
+      type: 'CL_SetOverlayBorderByID',
+      key: key,
+      data: {
+        id: args.id,
+        result,
+      }
+    });
+    sendMessage(msgJson);
+  }
+
+  const CL_SetScroll = function (key, args) {
+    // 에디터 컨테이너 엘리먼트 가져오기
+    const editorContainer = document.querySelector('.ql-editor');
+    const containerBounds = editorContainer.getBoundingClientRect();
+
+    if(args.scrollTop) {
+      editorContainer.scrollTop = args.scrollTop;
+    }
+
+    if(args.scrollOffset) {
+      editorContainer.scrollTop += args.scrollOffset;
+    }
+
+    const msgJson = JSON.stringify({
+      type: 'CL_SetScroll',
+      key: key,
+      data: {
+        result:'success',
+      }
+    });
+    sendMessage(msgJson);
+  }
 
   var getRequest = function (event) {
     var msg = JSON.parse(event.data);
@@ -242,7 +432,7 @@ export const editor_js = `
       case 'getSelection':
         getSelection(msg.key, msg.focus);
         break;
-      case 'getFormat': 
+      case 'getFormat':
         getFormat(msg.key, msg?.index, msg?.length);
         break;
       case 'getLeaf':
@@ -283,6 +473,25 @@ export const editor_js = `
         break;
       case 'formatText':
         formatText(msg.key, msg.index, msg.length, msg.formats, msg.source);
+        break;
+
+      // [STEP_2]
+      case 'CL_getElementAttributeByID':
+        CL_getElementAttributeByID(msg.key, msg.id);
+        break;
+      case 'CL_addElementClassListByID':
+        CL_addElementClassListByID(msg.key, msg.args);
+        break;
+      case 'CL_removeElementClassListByID':
+        CL_removeElementClassListByID(msg.key, msg.args);
+        break;
+      case 'CL_containsElementClassListByID':
+        CL_containsElementClassListByID(msg.key, msg.args);
+        break;
+      case 'CL_SetOverlayBorderByID':
+        CL_SetOverlayBorderByID(msg.key, msg.args);
+      case 'CL_SetScroll':
+        CL_SetScroll(msg.key, msg.args);
         break;
       default:
         break;

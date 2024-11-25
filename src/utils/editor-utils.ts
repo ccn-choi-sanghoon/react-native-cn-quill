@@ -87,6 +87,7 @@ export const createHtml = (args: CreateHtmlArgs = Inital_Args) => {
   </head>
   <body>
   <div id="${args.containerId}">
+    <div id="debug" class="debug">0</div>
     <div id="${args.editorId}">
       ${args.initialHtml}
     </div>

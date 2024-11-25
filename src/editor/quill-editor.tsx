@@ -229,6 +229,14 @@ export default class QuillEditor extends React.Component<
       case 'get-leaf':
       case 'remove-format':
       case 'format-text':
+
+      // [STEP_4]
+      case 'CL_getElementAttributeByID':
+      case 'CL_addElementClassListByID':
+      case 'CL_removeElementClassListByID':
+      case 'CL_containsElementClassListByID':
+      case 'CL_SetOverlayBorderByID':
+      case 'CL_SetScroll':
         if (response) {
           response.resolve(message.data);
           this._promises = this._promises.filter((x) => x.key !== message.key);
@@ -384,6 +392,26 @@ export default class QuillEditor extends React.Component<
     this.post({ command: 'dangerouslyPasteHTML', index, html });
   };
 
+  // [STEP_1]
+  CL_getElementAttributeByID = (id: string): Promise<object> => {
+    return this.postAwait({ command: 'CL_getElementAttributeByID', id });
+  };
+  CL_addElementClassListByID = (args: {id: string, clz: string}): Promise<object> => {
+    return this.postAwait({ command: 'CL_addElementClassListByID', args });
+  };
+  CL_removeElementClassListByID = (args: {id: string, clz: string}): Promise<object> => {
+    return this.postAwait({ command: 'CL_removeElementClassListByID', args });
+  };
+  CL_containsElementClassListByID = (args: {id: string, clz: string}): Promise<object> => {
+    return this.postAwait({ command: 'CL_containsElementClassListByID', args });
+  };
+  CL_SetOverlayBorderByID = (args: {id: string, isVisible: boolean}): Promise<object> => {
+    return this.postAwait({ command: 'CL_SetOverlayBorderByID', args });
+  };
+  CL_SetScroll = (args: {scrollTop?: number, scrollOffset?: number}): Promise<object> => {
+    return this.postAwait({ command: 'CL_SetScroll', args });
+  };
+
   renderWebview = (
     content: string,
     style: StyleProp<ViewStyle>,
@@ -410,6 +438,8 @@ export default class QuillEditor extends React.Component<
       source={{ html: content }}
       ref={this._webview}
       onMessage={this.onMessage}
+      allowsFullscreenVideo={false}
+      allowsInlineMediaPlayback={true}
     />
   );
 
